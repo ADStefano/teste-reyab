@@ -1,12 +1,21 @@
 # Teste Dev JR Reylab
 
-Teste para a empresa Reylab para desenvolvedor Júnior, o teste consiste em completar o desafio do site [RPAChallange](https://rpachallenge.com/), automatizando o download, preenchimento de formulário e buscando o tempo de execução.
+O objetivo do teste prático é automatizar o desafio [RPAChallange](https://rpachallenge.com/), realizando:
+* Download do arquivo inicial.
+* Leitura e tratamento dos dados da planilha excel.
+* Preenchimento automático do formulário.
+* Captura do tempo total de execução.
 
 ## Tecnologias utilizadas:
-* Python 3.14
-* Selenium 4.38.0
-* Pandas 2.3.3
-* Openpyxl 3.1.5
+
+![Python Version](https://img.shields.io/badge/Python-3.14-blue)
+![Selenium](https://img.shields.io/badge/Selenium-4.38.0-green)
+![Pandas](https://img.shields.io/badge/Pandas-2.3.3-yellow)
+![Pytest](https://img.shields.io/badge/Pytest-9.0.1-blueviolet)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
+![OpenPyXL](https://img.shields.io/badge/openpyxl-3.1.5-blue)
+
+
 
 ## Setup
 
@@ -22,20 +31,20 @@ python3 --version
 Caso não tenha o python instalado pode ver como instalar o Python clicando [aqui](https://www.python.org/downloads/).
 
 ### Criando o ambiente:
-Utilizei o conda para lidar com o ambiente deste projeto, para instalar o conda clique [aqui](https://docs.conda.io/projects/conda/en/latest/user-guide/install/).
+Utilizei o Conda para gerenciar o ambiente. Caso não tenha instaldo, siga as intruções [aqui](https://docs.conda.io/projects/conda/en/latest/user-guide/install/).
 
-Após instalado utilizar o seguinte comando para criar um abiente com o Python 3.11 instalado:
+Para criar o ambiente:
 ``` 
 conda create -n web_automation python=3.14
 ```
 
-Depois rode para ativar o ambiente:
+Para ativar o ambiente:
 ``` 
 conda activate web_automation 
 ```
 
 ### Instalando as dependências do projeto:
-O Projeto utiliza o [Selenium](https://www.selenium.dev/pt-br/documentation/), e o [Pandas](https://pandas.pydata.org/) junto do [Openpyxl](https://pypi.org/project/openpyxl/). Para instalar as dependências utilize o comando: 
+O Projeto utiliza o [Selenium](https://www.selenium.dev/pt-br/documentation/), [Pandas](https://pandas.pydata.org/) junto do [Openpyxl](https://pypi.org/project/openpyxl/) e [Pytest](https://docs.pytest.org/en/stable/). Para instalar as dependências utilize o comando: 
 ```
  pip install -r requirements.txt
  ```
@@ -46,18 +55,52 @@ Para rodar o projeto vá até a pasta em que ele foi extraido, e na raiz rode o 
 ```
 python main.py
 ```
+O script abrirá o navegador, realizará a automação completa e exibirá o tempo total no console.
 
 ## Considerações
-Esse foram os dois pontos com os quais tive problema de inicío:
-Encontrar os elementos corretamente e ajustar o local do download do arquivo.
-para lidar com o problema dos ids, procurei no elemento algo que fosse mais legivel e encontrei o ng-reflect-name, que tem um valor mais legivel, ex: 'labelFirstName.Assim fica melhor de entender o código do que colocar os ids em uma variável de ambiente no arquivo ini ou fazer alguma outra gambiarra.
-Para lidar com o problema do download fui pesquisar e descobri o tempfile.mkdtemp, que cria uma pasta temporária e faz um append no prefixo com um hash aleatório, assim fica mais facil de criar e deletar a pasta, sem correr o risco de pagar algo mais importante igual estava antes com o absolute() e o .parent
-Fora esses pontos não encontrei nenhuma outra dificuldade em fazer o script funcionar, minha preocupação se voltou para deixar o código mais modular e tentar o máximo possível otimizar o tempo do desafio, para isso meu primeiro ponto foi testar iterar pelo dataframe utilizando itertuples no lugar do iterrows, o itertuples foi 0.003s mais rápido. O próximo passo foi diminuir o tempo de espera na função ``` _download_wait ```, de 1 segundo para 0.5, testei com valores menores mas o ganho não foi grande o sufciente para justificar a eventual chance de erro.
+Abaixo explico as principais decisões técnicas adotadas ao longo do desenvolvimento e os desafios encontrados.
 
-Decidi fazer o script da automação em outra pasta em vez de em um arquivo só por questões de organização, caso precise rodar mais de alguma automação junta ou algum outro processo isso seria feito através do arquivo main.py, dessa forma sigo o padrão SOLID.
+### 1. Seleção dos elementos:
+Tive dificuldade inicial para localizar os campos do formulário, porque os IDs eram dinâmicos.
+Para tornar o código mais legível e evitar soluções improvisadas, utilizei o XPATH com os atributos para os campos do formulário:
+```
+ng-reflect-name='labelFirstName'
+```
+Eles são consistentes e deixam o código mais claro do que mapear os elementos via variáveis, ini ou outras gambiarras.
 
-Tentei separar bem as funções e deixar elas simples de serem lidas para facilitar o entendimento e facilitar futuros testes, também utilizei o factory por causa disso e já tenho alguma experiência utilizando esse modelo
+### 2. Download do arquivo:
+No inicío havia risco de apagar pastas erradas ao trabalhar com ```absolute()``` e ```.parent```.
+A solução definitiva foi utilizar:
+```
+tempfile.mkdtemp(prefix="rpa_challange")
+```
+Isso cria uma pasta temporária com um prefixo atrelado a um hash aleátorio, facilitando a criação, remoção e prevenindo acidentes ao remover o diretório.
 
-Não tinha certeza se deveria deixar os logs ou só a parte com o tempo então deixei a maioria dos logs comentados, apenas aparecendo os de erro mas ainda utilizei o logger q eu criei para mostrar o tempo.
+### 3. Estrutura do projeto e modularização:
+Optei por separar o código em uma pasta web_automation/ por motivos de organização e aderência a princípios como responsabilidade única.
+O main.py é o ponto de inicio da automação, permitindo rodar múltiplas automações no futuro, aproveitar a estrutura modular e facilitar teste unitários.
+Também utilizei o factory para instanciar o WebDriver com as suas dependências, deixando a classe principal mais facilde testar.
+
+### 4. Otimização:
+O tempo médio da execução da automação ficou: 4894,7.
+Tentei reduzir o tempo total da automação com o uso do ```itertuples``` no lugar do ```iterrows``` que diminui cerca de 0.003s o tempo de execução.
+E depois tentei diminuir o máximo possível o a espera na função ```download_wait```, deixando fixo em 0.5 segundos, o que reduziu o tempo sem comprometer a confiabilidade.
+
+### 5. Testes:
+Não consegui identificar uma forma eficiente de testar automaticamente os métodos que interagem diretamente com Selenium. Porém, consegui testar:
+* A função que lê a planilha com Pandas
+* A normalização dos nomes das colunas
+* A validação de erro quando o arquivo não existe
+* A extração do tempo via expressão regular (_get_time)
+
+Para rodar os teste basta rodar o seguinte comando no terminal:
+```
+pytest -v
+```
+
+### 6. Loggin:
+Não tinha certeza se deveria manter logs detalhados ou somente o tempo final.Por isso removi a maior parte dos logs, exeto o log de tempo final. O logging continua configurado corretamente caso precise no futuro.
+
+
 
 

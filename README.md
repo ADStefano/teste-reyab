@@ -1,4 +1,4 @@
-# Teste Dev JR Reylab
+# Teste Dev JR Reyab
 
 O objetivo do teste prático é automatizar o desafio [RPAChallange](https://rpachallenge.com/), realizando:
 * Download do arquivo inicial.

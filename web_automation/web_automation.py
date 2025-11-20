@@ -132,7 +132,7 @@ class WebAutomation:
             self._fill_form(df)
 
             submission_time = self._get_time()
-            self._logger.info(submission_time)
+            print(submission_time)
 
         except Exception as e:
             raise e(f"Erro ao executar automação: {e}")

@@ -99,7 +99,7 @@ pytest -v
 ```
 
 ### 6. Loggin:
-Não tinha certeza se deveria manter logs detalhados ou somente o tempo final.Por isso removi a maior parte dos logs, exeto o log de tempo final. O logging continua configurado corretamente caso precise no futuro.
+Não tinha certeza se deveria manter logs detalhados ou somente o tempo final.Por isso removi os logs, o log de tempo final foi substituido por um ```print()```. O logging continua configurado corretamente caso precise no futuro.
 
 
 
